@@ -4,12 +4,13 @@
     tools:context="com.example.test2.MainActivity" >
 
     <item
-        android:id="@+id/create"
+        android:id="@+id/submit"
         android:orderInCategory="100"
-        android:title="Create Fence"
+        android:title="Submit Fence"
         app:showAsAction="never"/>
     <item
         android:id="@+id/cancel"
+        android:enabled="true"
         android:orderInCategory="100"
         android:title="Cancel"
         app:showAsAction="never"/>
