@@ -67,7 +67,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 
 	// Google Map
 	private static GoogleMap map = null;
-	private ArrayList<LatLng> arrayPoints = null;
+	private ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
 	PolylineOptions polylineOptions;
 	private static boolean checkClick = false;
 	private static MenuItem mCreate;
@@ -106,7 +106,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		setContentView(R.layout.activity_display);
 		
 		String UID = getIntent().getStringExtra("UID");
-		Toast.makeText(getApplicationContext(), UID, Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), UID, Toast.LENGTH_LONG).show();
 		mLocationRequest = LocationRequest.create();
 		// Use high accuracy
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -125,7 +125,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		mLocationClient = new LocationClient(this, this, this);
 		// Start with updates turned off
 		mUpdatesRequested = false;
-		arrayPoints = new ArrayList<LatLng>();
+		//arrayPoints = new ArrayList<LatLng>();
 		SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mapD);
 		map = fm.getMap(); // display zoom map
@@ -144,14 +144,14 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		}
 		
 		//getFenceData(UID);
-		URL url;
+		/*URL url;
 		try {
 			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
 			new getFenceData().execute(url);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 
@@ -181,12 +181,24 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
 		mEditor.commit();
 		super.onPause();
+		
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		mLocationClient.connect();
+		URL url;
+		try {
+			arrayPoints.clear();
+			map.clear();
+			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
+			new getFenceData().execute(url);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	@Override
@@ -213,6 +225,16 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		} else {
 			mEditor.putBoolean("KEY_UPDATES_ON", false);
 			mEditor.commit();
+		}
+		URL url;
+		try {
+			arrayPoints.clear();
+			map.clear();
+			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
+			new getFenceData().execute(url);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

@@ -2,11 +2,14 @@ package com.example.test2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -44,6 +47,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,6 +60,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.MapFragment;
@@ -87,11 +92,10 @@ public class MainActivity extends FragmentActivity implements
 	// A fast frequency ceiling in milliseconds
 	private static final long FASTEST_INTERVAL = MILLISECONDS_PER_SECOND
 			* FASTEST_INTERVAL_IN_SECONDS;
-	public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/587Service/rest/";
+	public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/587Service/rest/insert/";
 	
-	public static final String PATH_NAME = "/insert";
 
-	public static String info, secLevel;
+	public static String info, secLevel,expiry;
 
 	// Define an object that holds accuracy and frequency parameters
 	LocationRequest mLocationRequest;
@@ -259,31 +263,27 @@ public class MainActivity extends FragmentActivity implements
 		// Send the polygon coordinates for updates
 		new Thread(new Runnable() {
 			public void run() {
-
-				String id = "5";
+				String id = "fences_sequence.nextval";
 				try {
-					URL url = new URL(BASE_URI + PATH_NAME + "/" + id+","+arrayPoints+",1,"+info+","+secLevel);
-					URLConnection connection = url.openConnection();
-					connection.setDoOutput(true);
-					BufferedReader in = new BufferedReader(
-							new InputStreamReader(connection.getInputStream()));
-
-					String returnString = "";
-					StringBuffer buff = null;
-
-					while ((returnString = in.readLine()) != null) {
-						buff.append(returnString);
-						Toast.makeText(getApplicationContext(), buff, Toast.LENGTH_SHORT).show();
-					}
-					in.close();
-
-				} catch (Exception e) {
-					Log.d("Exception", e.toString());
+					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/insert/5,34.032442,-118.291698,34.029090,-118.291677,34.028885,-118.288383,34.033153,-118.288834,2015-1-20%2020:00:00,1,This%20is%20a%20test%20fence,2");
+					expiry = expiry.replace(" ", "%20");
+					info = info.replace(" ", "%20");
+				    String text = BASE_URI+id+","+arrayPoints+","+expiry+",1,"+info+","+secLevel;
+					URL url = new URL(text);
+					Log.d("URL", url.toString());
+					HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+					conn.setRequestMethod("GET");
+	                conn.setInstanceFollowRedirects(false);
+	                conn.connect();
+	                InputStream stream = conn.getInputStream();
+	                stream.close();
+	                
+	                
+	          	} catch (Exception e) {
+					Log.d("URLException", e.toString());
 				}
-
 			}
 		}).start();
-
 	}
 
 	@Override
@@ -403,11 +403,14 @@ public class MainActivity extends FragmentActivity implements
 	
 	public void getDetails()
 	{
-		LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
+		final ContextThemeWrapper wrapper = new ContextThemeWrapper(this, android.R.style.Theme_Holo);
+		final LayoutInflater layoutInflater = (LayoutInflater) wrapper.getSystemService(LAYOUT_INFLATER_SERVICE);
+		//AlertDialog.Builder builder = new AlertDialog.Builder(wrapper);
+		//LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
 		
 		View promptView = layoutInflater.inflate(R.layout.prompt,null);
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(wrapper);
 		alertDialogBuilder.setView(promptView);
 		alertDialogBuilder.setTitle("Fence Details");
 		// set prompts.xml to be the layout file
@@ -421,27 +424,76 @@ public class MainActivity extends FragmentActivity implements
 		// Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 		final EditText text = (EditText) promptView.findViewById(R.id.descV);
-		final DatePicker picker = (DatePicker) promptView.findViewById(R.id.datePicker);
+		
 		
 		// setup a dialog window
 		alertDialogBuilder
 				.setCancelable(false)
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				.setPositiveButton("NEXT", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								// get user input and set it to result
 								info = text.getText().toString();
-								secLevel = spinner.getSelectedItem().toString();
+								secLevel = spinner.getSelectedItem().toString().substring(0,1);
+								
+								View dateView = layoutInflater.inflate(R.layout.date,null);
+								final DatePicker picker = (DatePicker) dateView.findViewById(R.id.datePicker);
+								AlertDialog.Builder alertDialogBuilder1 = new AlertDialog.Builder(wrapper);
+								alertDialogBuilder1.setView(dateView);
+								alertDialogBuilder1.setTitle("Fence Expiry Date");
+								
+								alertDialogBuilder1
+								.setCancelable(false)
+								.setPositiveButton("NEXT", new DialogInterface.OnClickListener() {
+											public void onClick(DialogInterface dialog, int id) {
+												
+												View timeView = layoutInflater.inflate(R.layout.time,null);
+								final TimePicker tpicker = (TimePicker) timeView.findViewById(R.id.timePicker);
+								
+								AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(wrapper);
+								alertDialogBuilder2.setView(timeView);
+								alertDialogBuilder2.setTitle("Fence Expiry Time");
+								
+								alertDialogBuilder2
+								.setCancelable(false)
+								.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+											public void onClick(DialogInterface dialog, int id) {
+																							
 								String pointsData = convertPolygonPoints();
 								checkClick = true;
 								mSubmit.setEnabled(false);
 								googleMap.clear();
 								arrayPoints.clear();
-								Toast.makeText(getApplicationContext(), picker.getDayOfMonth()+"/"+picker.getMonth()+
-										"/"+picker.getYear(), Toast.LENGTH_SHORT).show();
+								int month = picker.getMonth()+1;
+								expiry = picker.getYear()+"-"+month+"-"+picker.getDayOfMonth()+
+										" "+tpicker.getCurrentHour()+":"+tpicker.getCurrentMinute()+":00";
+								//Toast.makeText(getApplicationContext(), expiry, Toast.LENGTH_SHORT).show();
 								//Toast.makeText(getApplicationContext(), pointsData, Toast.LENGTH_LONG).show();
 								//Toast.makeText(getApplicationContext(), info, Toast.LENGTH_LONG).show();
 								//Toast.makeText(getApplicationContext(), secLevel, Toast.LENGTH_LONG).show();
-								//sendForUpdate(pointsData);
+								sendForUpdate(pointsData);
+											}
+								})
+								.setNegativeButton("Cancel",
+										new DialogInterface.OnClickListener() {
+											public void onClick(DialogInterface dialog,	int id) {
+												dialog.cancel();
+											}
+										});
+								AlertDialog alertTime = alertDialogBuilder2.create();
+
+								alertTime.show();
+											}
+								})
+								.setNegativeButton("Cancel",
+										new DialogInterface.OnClickListener() {
+											public void onClick(DialogInterface dialog,	int id) {
+												dialog.cancel();
+											}
+										});
+								
+								AlertDialog alertDate = alertDialogBuilder1.create();
+
+								alertDate.show();
 							}
 						})
 				.setNegativeButton("Cancel",
