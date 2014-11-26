@@ -22,4 +22,22 @@
         android:onClick="displayF"
         android:text="Display Fences" />
 
+   <RadioGroup 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+    <RadioButton android:id="@+id/enableA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Alerts"
+        android:onClick="onEnableAlerts"/>
+    <RadioButton android:id="@+id/disableA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Disable Alerts"
+        android:onClick="onEnableAlerts"
+        android:checked="true"/>
+</RadioGroup>
+
 </RelativeLayout>

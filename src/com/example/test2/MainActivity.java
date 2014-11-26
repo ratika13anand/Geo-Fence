@@ -200,8 +200,9 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onMapClick(LatLng point) {
 		if (checkClick == true) {
-			googleMap.addMarker(new MarkerOptions().position(point).icon(
-					BitmapDescriptorFactory.fromResource(R.drawable.pt1)));
+			//googleMap.addMarker(new MarkerOptions().position(point).icon(
+				//	BitmapDescriptorFactory.fromResource(R.drawable.pt1)));
+			googleMap.addMarker(new MarkerOptions().position(point));
 			arrayPoints.add(point);
 			//Toast.makeText(getApplicationContext(), point.toString(), Toast.LENGTH_LONG).show();
 		}

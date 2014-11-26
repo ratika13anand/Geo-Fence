@@ -16,6 +16,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -58,6 +60,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class DisplayActivity extends FragmentActivity implements
@@ -89,7 +92,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	// A fast frequency ceiling in milliseconds
 	private static final long FASTEST_INTERVAL = MILLISECONDS_PER_SECOND
 			* FASTEST_INTERVAL_IN_SECONDS;
-
 
 	// Define an object that holds accuracy and frequency parameters
 	LocationRequest mLocationRequest;
@@ -134,6 +136,38 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		map.setOnMapClickListener(this);
 		map.setOnMapLongClickListener(this);
 		map.setOnMarkerClickListener(this);
+		map.setInfoWindowAdapter(new InfoWindowAdapter() {
+			 
+            // Use default InfoWindow frame
+            @Override
+            public View getInfoWindow(Marker marker) {
+            	return null;                 
+            }
+ 
+            // Defines the contents of the InfoWindow
+            @Override
+            public View getInfoContents(Marker marker) {
+             	
+             	 // Getting view from the layout file info_window_layout
+                View v = getLayoutInflater().inflate(R.layout.info_window_layout, null);
+ 
+                // Getting the position from the marker
+                String snippet = marker.getSnippet();
+                String title = marker.getTitle();
+                // Getting reference to the TextView to set longitude
+                TextView titleV = (TextView) v.findViewById(R.id.titleV);
+                
+                // Setting the latitude
+                titleV.setText(title);
+                TextView snippetV = (TextView) v.findViewById(R.id.snippetV);
+ 
+                // Setting the latitude
+                snippetV.setText(snippet);
+  
+                // Returning the view containing InfoWindow contents
+                return v;
+            }
+        });
 		
 		try {
 			// Loading map
@@ -143,15 +177,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			e.printStackTrace();
 		}
 		
-		//getFenceData(UID);
-		/*URL url;
-		try {
-			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
-			new getFenceData().execute(url);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		
 	}
 
@@ -187,20 +212,25 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		getFenceDisplay();
+		
+	}
+	
+	protected void getFenceDisplay()
+	{
+		
 		mLocationClient.connect();
 		URL url;
 		try {
 			arrayPoints.clear();
-			map.clear();
+			fenceList.clear();
 			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
 			new getFenceData().execute(url);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-	
 	@Override
 	protected void onStop() {
 		// If the client is connected
@@ -218,6 +248,8 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		//Toast.makeText(getApplicationContext(), "in resume", Toast.LENGTH_SHORT).show();
 		if (mPrefs.contains("KEY_UPDATES_ON")) {
 			mUpdatesRequested = mPrefs.getBoolean("KEY_UPDATES_ON", false);
 
@@ -226,16 +258,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			mEditor.putBoolean("KEY_UPDATES_ON", false);
 			mEditor.commit();
 		}
-		URL url;
-		try {
-			arrayPoints.clear();
-			map.clear();
-			url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
-			new getFenceData().execute(url);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		getFenceDisplay();
 	}
 	
 	@Override
@@ -262,12 +285,19 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		if (id == R.id.action_settings) {
 			return true;
 		}
+		if (id == R.id.refresh) {
+			getFenceDisplay();
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
-	public boolean onMarkerClick(Marker arg0) {
+	public boolean onMarkerClick(Marker marker) {
 		// TODO Auto-generated method stub
+		if (marker.isInfoWindowShown())
+		marker.hideInfoWindow();
+		else
+			marker.showInfoWindow();
 		return false;
 	}
 
@@ -329,8 +359,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
 					
 		               HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
-		                  conn.setReadTimeout(10000 /* milliseconds */);
-		                  conn.setConnectTimeout(15000 /* milliseconds */);
 		                  conn.setRequestMethod("GET");
 		                  conn.setDoInput(true);
 		                  conn.connect();
@@ -359,6 +387,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	
 	public void parseXMLAndStoreIt(XmlPullParser myParser) {
 
+		fenceList.clear();
 		int event;
 		String text= null;
 		
@@ -398,7 +427,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 						sLevel = text;
 					}
 					else if(name.equals("fence")){
-						FenceObj obj = new FenceObj(fenceId,expiry,coord,validity,info,sLevel);
+						FenceObj obj = new FenceObj(fenceId,expiry,coord,validity,info,sLevel,null);
 						fenceList.add(obj);
 						fenceId =null;expiry=null;coord=null;validity=null;info=null;sLevel=null;
 					}
@@ -415,10 +444,12 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	public void displayData() {
 
 		//fenceList.get(0).addPolygon(map);
+        map.clear();
+		//Toast.makeText(getApplicationContext(), "list size"+fenceList.size(), Toast.LENGTH_SHORT).show();
 		for (int i = 0; i < fenceList.size(); i++) {
 			//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
 			System.out.println(fenceList.get(i).toString());
-			fenceList.get(i).addPolygon(map);
+			fenceList.get(i).addPoly(map);
 		}
 	}
 }
