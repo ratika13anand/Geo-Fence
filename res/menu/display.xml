@@ -12,6 +12,27 @@
      <item
         android:id="@+id/refresh"
         android:orderInCategory="100"
-        android:title="Refresh"/>
-
+        android:title="Full Search"/>
+     
+     <item
+        android:id="@+id/point"
+        android:enabled="true"
+        android:orderInCategory="100"
+        android:title="Point Search"
+        app:showAsAction="never"/>
+     
+     <item
+        android:id="@+id/range"
+        android:enabled="true"
+        android:orderInCategory="100"
+        android:title="Range Search"
+        app:showAsAction="never"/>
+       
+     <TextView
+        android:id="@+id/numberview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Select a number from NumberPicker"
+        android:textStyle="bold"  />
 </menu>

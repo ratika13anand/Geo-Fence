@@ -180,10 +180,7 @@ import android.widget.Toast;
 
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-			
-	
-			
+			}			
 		}
 
 		/**
@@ -303,9 +300,11 @@ import android.widget.Toast;
 			// automatically handle clicks on the Home/Up button, so long
 			// as you specify a parent activity in AndroidManifest.xml.
 			int id = item.getItemId();
-			if (id == R.id.action_settings) {
-				return true;
-			}
+			if(id == R.id.action_settings)
+			{
+				Intent i = new Intent(this, SettingsActivity.class);
+				startActivityForResult(i, 1);
+	        }
 			return super.onOptionsItemSelected(item);
 		}
 

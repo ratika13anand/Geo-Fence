@@ -45,9 +45,9 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import android.support.v4.app.FragmentActivity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -69,7 +69,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DisplayActivity extends FragmentActivity implements
+public class DeleteActivity extends FragmentActivity implements
 GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener, LocationListener,
 OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
@@ -78,11 +78,14 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	private static GoogleMap map = null;
 	private ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
 	PolylineOptions polylineOptions;
+	private static MenuItem mSubmit;
 	private static boolean checkpoint = false;
 	private static boolean clickpoint = false;
-	
+	private StringBuilder fence_ids = new StringBuilder();
     private static ArrayList<FenceObj> fenceList = new ArrayList<FenceObj>();
-    public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/";
+
+    private static ArrayList<FenceObj> overlapList = new ArrayList<FenceObj>();
+    public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/587Service/rest/";
 	
 	public static final String PATH_NAME = "/fence/display";
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -224,8 +227,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	}
 	
 	protected void getFenceDisplay()
-	{
-		
+	{		
 		mLocationClient.connect();
 		URL url;
 		try {
@@ -265,7 +267,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			mEditor.putBoolean("KEY_UPDATES_ON", false);
 			mEditor.commit();
 		}
-		if(sMenu!=null && sMenu.getItem(1).isChecked())
+		
 		getFenceDisplay();
 	}
 	
@@ -280,173 +282,92 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.display, menu);
+		getMenuInflater().inflate(R.menu.delete, menu);
 		sMenu = menu; 
-		sMenu.getItem(1).setCheckable(true);
-		sMenu.getItem(1).setChecked(true);
+		
 		return true;
 	}
 
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if(id == R.id.action_settings)
-		{
-			Intent i = new Intent(this, SettingsActivity.class);
-			startActivityForResult(i, 1);
-        }
-		if (id == R.id.refresh) {
-			item.setCheckable(true); 
-			map.clear();
-			checkpoint =false;
-			clickpoint=false;
-	 		sMenu.getItem(2).setChecked(false); 
-	 		sMenu.getItem(3).setChecked(false); 
-	 		if(!item.isChecked()) 
-	 		item.setChecked(true);
-	 		Toast.makeText(getApplicationContext(), "Fetching Fences", 
-						Toast.LENGTH_LONG).show();
-			getFenceDisplay();
+		if (id == R.id.action_settings) {
+			return true;
 		}
-		if (id == R.id.point) { 
-	 		item.setCheckable(true); 
-	 		sMenu.getItem(1).setChecked(false); 
-	 		sMenu.getItem(3).setChecked(false); 
-	 		if(!item.isChecked()) 
-	 		item.setChecked(true); 
-	 		map.clear(); 
-	 		checkpoint = true; 
-	 		clickpoint = true; 
-	 		Toast.makeText(getApplicationContext(), "Click Map To Drop Marker", 
-	 						Toast.LENGTH_LONG).show(); 
-	 					} 
-	 			if (id == R.id.range) { 
-	 						item.setCheckable(true); 
-	 					sMenu.getItem(1).setChecked(false); 
-	 					sMenu.getItem(2).setChecked(false); 
-	 					 
-	 				item.setChecked(true); 
-	 					createDialog(); 
-	 						map.clear(); 
-	 					} 
+		if (id == R.id.submit) {
+			
+	 		Toast.makeText(getApplicationContext(), "Deleting Selected Fences", 
+						Toast.LENGTH_LONG).show();
+	 		askConfirmation();
+	 		sMenu.getItem(0).setEnabled(false);
+			
+			overlapList.clear();
+		}
+		
 		return super.onOptionsItemSelected(item);
 	}
-	private void createDialog() { 
- 					// TODO Auto-generated method stub 
- 					final ContextThemeWrapper wrapper = new ContextThemeWrapper(this, android.R.style.Theme_Holo); 
- 					final LayoutInflater layoutInflater = (LayoutInflater) wrapper.getSystemService(LAYOUT_INFLATER_SERVICE); 
- 					 
- 					View promptView = layoutInflater.inflate(R.layout.userinput, null); 
- 			 
- 					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(wrapper); 
- 					alertDialogBuilder.setView(promptView); 
- 					alertDialogBuilder.setTitle("Enter Radius (Miles)"); 
- 				final NumberPicker np = (NumberPicker) promptView 
- 							.findViewById(R.id.numberPicker); 
- 					np.setMaxValue(100); 
- 				np.setMinValue(1); 
- 					np.setWrapSelectorWheel(true); 
- 					// setup a dialog window 
- 					alertDialogBuilder 
- 						.setCancelable(false) 
- 						.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
- 									public void onClick(DialogInterface dialog, int id) { 
- 										// get user input and set it to result 
- 										executeRangeQuery(np.getValue()); 
- 									} 
- 								}) 
- 						.setNegativeButton("Cancel", 
- 								new DialogInterface.OnClickListener() { 
- 									public void onClick(DialogInterface dialog,	int id) { 
- 										dialog.cancel(); 
- 									} 
- 								}); 
- 					// create an alert dialog 
- 					AlertDialog alertD = alertDialogBuilder.create(); 
- 			 
- 					alertD.show(); 
- 			 
- 				} 
- 			 
- 				protected void executeRangeQuery(int range) { 
- 				// TODO Auto-generated method stub 
- 					try { 
- 						arrayPoints.clear(); 
- 						fenceList.clear();
- 						Location location = mLocationClient.getLastLocation(); 
- 						String loc = Double.toString(location.getLatitude()) + ","+ Double.toString(location.getLongitude()) + "," + range ; 
- 						URL url = new URL( 
- 								"http://csci587team7.cloudapp.net:8080/587Service/rest/fence/range/" 
- 										+ loc); 
- 						System.out.println(url); 
- 						Toast.makeText(getApplicationContext(), "Fetching Fences within "+range+" mile(s)", 
- 						Toast.LENGTH_LONG).show(); 
- 						new getFenceData().execute(url); 
- 					} catch (MalformedURLException e) { 
- 						// TODO Auto-generated catch block 
- 						e.printStackTrace(); 
- 				} 
- 				 
- 			} 
- 		 
 	
+	@SuppressWarnings("deprecation")
+	public void askConfirmation() {
+
+		AlertDialog builder = new AlertDialog.Builder(DeleteActivity.this).create();
+		builder.setTitle("Confirm Deletion?");
+		builder.setButton("Yes", new DialogInterface.OnClickListener() {
+	           public void onClick(DialogInterface dialog, int id) {
+	               // User clicked OK button.Delete the Fence
+	        	   //del_flag=true;
+	        	String text1="http://csci587team7.cloudapp.net:8080/587Service/rest/delete/"+fence_ids;
+	   			URL url1;
+				try {
+					url1 = new URL(text1);
+					new del_this().execute(url1);		
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				dialog.dismiss();
+	           }
+	       });
+	builder.setButton2("Cancel", new DialogInterface.OnClickListener() {
+	           public void onClick(DialogInterface dialog, int id) {
+	               // User cancelled the dialog
+	        	   getFenceDisplay();
+	        	   dialog.dismiss();
+	           }
+	       });
+		builder.show();
+	}	 
+
 	@Override
 	public boolean onMarkerClick(Marker marker) {
 		// TODO Auto-generated method stub
-		if (clickpoint == true) {
-			URL url;
-			String temp;
-			StringBuffer buf = new StringBuffer();
-			LatLng coordinate = marker.getPosition();
-			temp = coordinate.toString();
-			buf.append(temp.substring(temp.indexOf('(') + 1,
-					temp.indexOf(')') - 1));
-			try {
-				arrayPoints.clear();
-				fenceList.clear();
-				map.clear();
-				url = new URL(
-						"http://csci587team7.cloudapp.net:8080/587Service/rest/fence/point/"
-								+ buf.toString());
-				System.out.println(url);
-				Toast.makeText(getApplicationContext(), "Fetching Fences",
-				Toast.LENGTH_LONG).show();
-				new getFenceData().execute(url);
-				clickpoint = false;
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
+
 			if (marker.isInfoWindowShown())
 				marker.hideInfoWindow();
 			else
 				marker.showInfoWindow();
-		}
+
 		return false;
 	}
 
 	@Override
-	public void onMapLongClick(LatLng arg0) {
+	public void onMapLongClick(LatLng point) {
 		// TODO Auto-generated method stub
-		
+		Toast.makeText(getApplicationContext(), "map long click -checking", Toast.LENGTH_SHORT).show();
+		checkFence(point);
 	}
 
 	@Override
 	public void onMapClick(LatLng point) {
 		// TODO Auto-generated method stub
-		if (checkpoint == true) {
-			map.clear();
-			map.addMarker(new MarkerOptions().position(point).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).draggable(true));
-			//checkpoint = false;
-			clickpoint=true;
-			Toast.makeText(getApplicationContext(), "Drag Map Marker To Desired Location.\nClick Marker To Fetch Fences Within 1 Mile.",
-			Toast.LENGTH_LONG).show();
-			
-		}
+		Toast.makeText(getApplicationContext(), "map click", Toast.LENGTH_SHORT).show();
+			// Get Intersecting Fences
+		
+		
 	}
 
 
@@ -591,5 +512,242 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			fenceList.get(i).addPoly(map);
 		}
 	}
+
+	public void highlightFences() {
+
+        if(overlapList.size()==0)
+		Toast.makeText(getApplicationContext(), "No Fence Selected!", Toast.LENGTH_SHORT).show();
+        
+		for (int i = 0; i < overlapList.size(); i++) {
+			//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
+			System.out.println(overlapList.get(i).toString());
+			overlapList.get(i).highlightPoly(map);
+		}
+	}
+	
+	protected void checkFence(LatLng point)
+	{		
+		System.out.println(point);
+		String text=BASE_URI+"overlapfence/currentloc/"+point.latitude+","+point.longitude;
+		try {	
+			URL url = new URL(text);
+			new findOverlap().execute(url);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+	
+	private class findOverlap extends AsyncTask<URL, Integer, String> {
+	     protected String doInBackground(URL... urls) {
+				try {
+						  HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
+		                  conn.setReadTimeout(10000 /* milliseconds */);
+		                  conn.setConnectTimeout(15000 /* milliseconds */);
+		                  conn.setRequestMethod("GET");
+		                  conn.setDoInput(true);
+		                  conn.connect();
+		                  InputStream stream = conn.getInputStream();
+		                  XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
+		                  XmlPullParser myParser = xmlFactoryObject.newPullParser();
+		                  myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+		                  myParser.setInput(stream, null);
+		                  String res = checkOverlap(myParser);
+		                  stream.close();
+		              	return res;
+		                
+		            
+				} catch (Exception e) {
+					Log.d("Exception", e.toString());
+					return "false";
+				}
+			
+
+			}
+	     protected void onPostExecute(String res) {
+	    	 
+	    	 if(res.equals("true"))
+	    		 {
+	    		 Toast.makeText(getApplicationContext(), "overlap found", Toast.LENGTH_SHORT).show();
+	    		 highlightFences();
+	    		 sMenu.getItem(0).setEnabled(true);
+	    		 }
+	    	 else
+	    		 Toast.makeText(getApplicationContext(), "overlap not found", Toast.LENGTH_SHORT).show();
+	     }
+	}
+	     
+	     public String checkOverlap(XmlPullParser myParser) {
+	 		
+	 		String text=null;
+
+	 		String fenceId = new String();
+	 		String expiry = new String();
+	 		String coord = new String();
+	 		String validity = new String();
+	 		String info = new String();
+	 		String sLevel = new String();
+	 		String distance = new String();
+	 		int overlap_no=0;
+	 		int event;
+	 		try {
+	 			event = myParser.getEventType();
+	 			while (event != XmlPullParser.END_DOCUMENT) {
+	 				String name=myParser.getName();
+	 				switch (event){
+	 				case XmlPullParser.START_TAG:
+	 					break;
+	 				case XmlPullParser.TEXT:
+	 					text = myParser.getText();
+	 					break;
+	 				case XmlPullParser.END_TAG:
+	 					if(name.equals("fenceid")){
+	 						
+	 						fenceId = text;
+	 					}
+	 					else if(name.equals("expiry")){ 	
+	 						
+	 						expiry = text;
+	 					}
+	 					else if(name.equals("coordinates")){ 	
+	 						coord = text;
+	 					}
+	 					else if(name.equals("validity")){ 	
+	 						validity = text;
+	 					}
+	 					else if(name.equals("info")){ 	
+	 						info = text;
+	 					}
+	 					else if(name.equals("security_level")){ 	
+	 						sLevel = text;
+	 					}
+	 					else if(name.equals("distance")){ 	
+	 						distance = text;
+	 					}
+	 					else if(name.equals("fence")){
+	 						overlap_no++;
+	 						if(overlapList.size()==0)
+	 							{	 		
+	 							
+	 							fence_ids.append(fenceId);
+	 							}
+	 						else
+	 							fence_ids.append(","+fenceId);
+	 						
+	 						FenceObj obj = new FenceObj(fenceId,expiry,coord,validity,info,sLevel,distance);
+	 						overlapList.add(obj);
+
+	 						fenceId =null;expiry=null;coord=null;validity=null;info=null;sLevel=null;distance=null;
+	 					}
+	 					break;
+	 				}		 
+	 				event = myParser.next(); 
+	 				}
+	 		}
+	 		catch(Exception e)
+	 		{
+	 			e.printStackTrace();
+	 		}				
+	 					
+	 		if(overlap_no!=0)
+	 			return "true";
+	 		else
+	 			return "false";
+	 	}
+	
+	
+	
+	private class del_this extends AsyncTask<URL, Integer, String> {
+	     protected String doInBackground(URL... urls) {
+				try {
+					
+					HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
+	                  conn.setReadTimeout(10000 /* milliseconds */);
+	                  conn.setConnectTimeout(15000 /* milliseconds */);
+	                  conn.setRequestMethod("GET");
+	                  conn.setDoInput(true);
+	                  conn.connect();
+	                  InputStream stream = conn.getInputStream();
+	                  XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
+	                  XmlPullParser myParser = xmlFactoryObject.newPullParser();
+	                  myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+	                  myParser.setInput(stream, null);
+	                  String res = checkdelstatus(myParser);
+	                  stream.close();
+	                  return res;
+	        
+					}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					return "false";
+				}
+				
+			}
+	     
+protected void onPostExecute(String res) {
+	         getFenceDisplay();
+	         overlapList.clear();
+	         fence_ids.setLength(0);
+	    	 if(res.equals("true"))
+	    		 {
+	    		 Toast.makeText(getApplicationContext(), "Fences deleted", Toast.LENGTH_SHORT).show();
+	    		 
+	    		 }
+	    	 else
+	    		 Toast.makeText(getApplicationContext(), "Unable to delete selected fences!", Toast.LENGTH_SHORT).show();
+	     }
+	     
+	}
+	
+	
+	public String checkdelstatus(XmlPullParser myParser) {
+		int status;
+		String mode="";
+		String text="";
+		String event_status="";
+		String test=myParser.toString();
+		System.out.println(test);
+		try {
+			status = myParser.getEventType();
+			while (status != XmlPullParser.END_DOCUMENT) {
+				String name=myParser.getName();
+				switch (status){
+				case XmlPullParser.START_TAG:
+					break;
+				case XmlPullParser.TEXT:
+					text = myParser.getText();
+					break;
+				case XmlPullParser.END_TAG:
+					if(name.equals("status")){
+						 event_status= text;
+					}
+					
+					break;
+				}
+				status = myParser.next();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+			if(event_status.trim().equalsIgnoreCase("error"))
+			{				
+				//tried to login but failed.Hence normal app with just display
+				return "false"; 				
+				   
+			}
+			else
+			{
+				//valid user.Hence give him right to modify/create fences
+			return "true";
+				
+				
+			}
+		}
+
 }
 	

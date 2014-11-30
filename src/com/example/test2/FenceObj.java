@@ -102,4 +102,39 @@ public class FenceObj {
 		}
 		System.out.println("Adding Polygon");
 	}
+	
+	public void highlightPoly(GoogleMap map)
+	{
+		ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
+		String delims = "[;]";
+		String[] tokens = this.coordinates.split(delims);
+		
+		for (int i = 0; i < tokens.length; i++)
+		{
+			String[] geo = tokens[i].split(",");
+			double lati = Double.parseDouble(geo[0]);
+			double lngi = Double.parseDouble(geo[1]);
+			arrayPoints.add(new LatLng(lati, lngi));
+		}
+		
+		PolygonOptions polygonOptions = new PolygonOptions();
+		polygonOptions.addAll(arrayPoints);
+		polygonOptions.strokeColor(Color.parseColor("#000000")); // Red
+
+		polygonOptions.fillColor(Color.argb(100,0,0,0));
+		
+		
+		polygonOptions.strokeWidth(5);
+		Polygon polygon = map.addPolygon(polygonOptions);
+	
+		for(int i=0;i<arrayPoints.size();i++)
+		{
+			map.addMarker(new MarkerOptions()
+	        .position(arrayPoints.get(i))
+	        .title("Fence Details")
+	        .snippet(this.info));
+				
+		}
+		System.out.println("Highlighting Polygon");
+	}
 }

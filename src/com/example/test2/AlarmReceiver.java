@@ -34,6 +34,7 @@ import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener, LocationListener
 {   
 
+	 public static final String PREFS_VIBRATE = "Vibrate" ;
+	    public static final String PREFS_SOUND = "Password" ;
 	private static Context sContext = null;
 	   private int NOTIFICATION = 1;
 	   LocationRequest mLocationRequest;
@@ -51,13 +54,14 @@ GooglePlayServicesClient.OnConnectionFailedListener, LocationListener
 		boolean mUpdatesRequested;
 		SharedPreferences mPrefs;
 		Editor mEditor;
-
+		private static Boolean sVibrate;
+		private static Boolean sSound;
 		private static String lat;
 		private static String lng;
 		private NotificationManager mNM;
 		private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 		// Milliseconds per second
-		private static final int MILLISECONDS_PER_SECOND = 100;
+		private static final int MILLISECONDS_PER_SECOND = 1000;
 		// Update frequency in seconds
 		public static final int UPDATE_INTERVAL_IN_SECONDS = 1;
 		// Update frequency in milliseconds
@@ -72,8 +76,16 @@ GooglePlayServicesClient.OnConnectionFailedListener, LocationListener
 public void onReceive(Context context, Intent intent) {
 	// TODO Auto-generated method stub
 	sContext = context;
+	SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+	sVibrate = sharedPref.getBoolean(SettingsActivity.KEY_PREF_VIBRATE, true);
+	sSound =sharedPref.getBoolean(SettingsActivity.KEY_PREF_RING, true);
+	
+	String vibrate = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_VIBRATE, true);
+	String sound = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_RING, true);
+	
+	Toast.makeText(sContext, "vibrate is "+vibrate, Toast.LENGTH_SHORT).show();
+	Toast.makeText(sContext, "sound is "+sound, Toast.LENGTH_SHORT).show();
 	setLocation();
-	Toast.makeText(context, "Repeating", Toast.LENGTH_SHORT).show();
 	pingServerAtIntervals();
 }
 
@@ -180,6 +192,7 @@ private class getOverlapData extends AsyncTask<URL, Integer, String> {
 			mNM = (NotificationManager)sContext.getSystemService("notification");
 	        // Display a notification about us starting.  We put an icon in the status bar.
 	        showNotification(res);
+	        mLocationClient.disconnect();
 		}
 		//else
 			//Toast.makeText(sContext, "No Intersect Found", Toast.LENGTH_SHORT).show();
@@ -195,8 +208,13 @@ private class getOverlapData extends AsyncTask<URL, Integer, String> {
                 System.currentTimeMillis());
 
         Intent newIntent = new Intent(sContext, OverlapActivity.class);
+     
+		if(sVibrate.equals("true"))
+	        notification.defaults |= Notification.DEFAULT_VIBRATE;
+		
+		if(sSound.equals("true"))
         notification.defaults |= Notification.DEFAULT_SOUND;
-        notification.defaults |= Notification.DEFAULT_VIBRATE;
+        
 	    newIntent.putExtra("xml", res);
 	    newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // The PendingIntent to launch our activity if the user selects this notification
@@ -209,6 +227,8 @@ private class getOverlapData extends AsyncTask<URL, Integer, String> {
 
         // Send the notification.
         mNM.notify(NOTIFICATION, notification);
+        
+        
     }
 
 @Override

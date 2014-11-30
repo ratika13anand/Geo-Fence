@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+ 
+    
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="AlertOn"
+            android:summary="Regular Geofence Alerts based on Ping Frequency Selected"
+            android:title="Enable Regular Alerts" >
+        </CheckBoxPreference>
+ 
+        <ListPreference
+            android:key="PingFrequency"
+            android:entries="@array/PingFrequency"
+            android:summary="@string/ping_summary"
+            android:entryValues="@array/PingFrequencyValues"
+            android:defaultValue="60000"
+            android:title="@string/ping_frequency" />
+        
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="Vibrate"
+            android:summary="@string/vib_help"
+            android:title="@string/Vibrate" >
+        </CheckBoxPreference>
+ 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="Ring"
+            android:summary="@string/Ring_help"
+            android:title="@string/RingON" >
+        </CheckBoxPreference>
+ 
+ 
+</PreferenceScreen>

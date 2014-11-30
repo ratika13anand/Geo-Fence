@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="PingFrequency">
+        <item name="0">Once in 30 Seconds</item>
+        <item name="1">Once in 1 Minute</item>
+        <item name="2">Once in 2 Minutes</item>
+        <item name="5">Once in 5 Minutes</item>
+
+    </string-array>
+    <string-array name="PingFrequencyValues">
+        <item name="0">30000</item>
+        <item name="1">60000</item>
+        <item name="2">120000</item>
+        <item name="5">300000</item>
+
+    </string-array>
+     
+</resources>

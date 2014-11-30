@@ -4,9 +4,29 @@
     <string name="app_name">test2</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_display">DisplayActivity</string>
+    <string name="title_activity_home">GeoFence Home</string>
+    <string name="title_activity_display">Display Fences</string>
+    <string name="title_activity_overlap">Intersecting/Nearby Fences</string>
+    <string name="title_activity_delete">Delete Fences</string>
+    <string name="UsrName">User Name : </string>
+    <string name="Usrpwd">Password : </string>
+    <string name="Uhelp">Enter User Name</string>
+    <string name="Phelp">Enter Password</string>
+    <string name="Log">Login</string>
+    <string name="Reg">Register</string>
+    <string name="skip">Skip Login</string>
+    <string name="optout">Opt-out Alerts</string>
+    <string name="opt_out">Opt-Out</string>
+    <string name="ping_summary">How Frequently you need Alerts</string>
+    <string name="ping_frequency">Ping Frequency</string>
+    <string name="Settings">Settings</string>
+    <string name="vib_help">Vibrate Alert ON</string>
+    <string name="Ring_help">Ring Alert ON</string>
+    <string name="Vibrate">Vibration Mode</string>
+    <string name="RingON">Ringer Mode</string>
 
+    <string name="Delete">Delete</string>
+    <string name="dialog_msg">Delete Confirmation</string>
     <string-array name="secLevelArr">
         <item>Choose Security Level</item>
         <item>1(High Danger)</item>
@@ -14,6 +34,8 @@
         <item>3(Low Danger)</item>
     </string-array>
 
-    <string name="title_activity_overlap">OverlapActivity</string>
+    <string name="title_activity_login">Administrator Login</string>
+    <string name="title_activity_settings">GeoFence Alert Settings</string>
+    <string name="title_activity_register">RegisterActivity</string>
 
 </resources>
