@@ -69,7 +69,7 @@ OnSharedPreferenceChangeListener {
 		}
 
 		else if (key.equals(KEY_PREF_PING)) {
-			Toast.makeText(getApplicationContext(), "Ping changed "+sharedPreferences.getString(key,"60000"), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(getApplicationContext(), "Ping changed "+sharedPreferences.getString(key,"60000"), Toast.LENGTH_SHORT).show();
 			AlarmManager alarmManager=(AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         	Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         	PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

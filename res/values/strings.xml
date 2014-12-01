@@ -17,11 +17,11 @@
     <string name="skip">Skip Login</string>
     <string name="optout">Opt-out Alerts</string>
     <string name="opt_out">Opt-Out</string>
-    <string name="ping_summary">How Frequently you need Alerts</string>
+    <string name="ping_summary">Minimum Time Interval between Alerts</string>
     <string name="ping_frequency">Ping Frequency</string>
     <string name="Settings">Settings</string>
-    <string name="vib_help">Vibrate Alert ON</string>
-    <string name="Ring_help">Ring Alert ON</string>
+    <string name="vib_help">Vibrate Alert ON/OFF</string>
+    <string name="Ring_help">Ring Alert ON/OFF</string>
     <string name="Vibrate">Vibration Mode</string>
     <string name="RingON">Ringer Mode</string>
 

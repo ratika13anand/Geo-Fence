@@ -45,6 +45,7 @@ import android.graphics.Point;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -260,9 +261,10 @@ public class MainActivity extends FragmentActivity implements
 		buff.append(temp.substring(temp.indexOf('(')+1,temp.indexOf(')')-1));
 		return buff.toString();
 	}
+	
 	protected void sendForUpdate(final String arrayPoints) {
 		// Send the polygon coordinates for updates
-		new Thread(new Runnable() {
+		Thread t = new Thread(new Runnable() {
 			public void run() {
 				String id = "fences_sequence.nextval";
 				try {
@@ -277,14 +279,20 @@ public class MainActivity extends FragmentActivity implements
 	                conn.setInstanceFollowRedirects(false);
 	                conn.connect();
 	                InputStream stream = conn.getInputStream();
-	                stream.close();
-	                
-	                
+	                stream.close();     
+	                MainActivity.this.runOnUiThread(new Runnable() {
+	                    public void run() {
+	                        Toast.makeText(MainActivity.this, "Successfully Inserted 1 Fence!", Toast.LENGTH_SHORT).show();
+	                    }
+	                });
 	          	} catch (Exception e) {
 					Log.d("URLException", e.toString());
 				}
 			}
-		}).start();
+		});
+
+	t.start();
+	
 	}
 
 	@Override

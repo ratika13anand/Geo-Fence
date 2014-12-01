@@ -43,9 +43,11 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentSender;
@@ -300,8 +302,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		}
 		if (id == R.id.submit) {
 			
-	 		Toast.makeText(getApplicationContext(), "Deleting Selected Fences", 
-						Toast.LENGTH_LONG).show();
 	 		askConfirmation();
 	 		sMenu.getItem(0).setEnabled(false);
 			
@@ -357,17 +357,12 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	@Override
 	public void onMapLongClick(LatLng point) {
 		// TODO Auto-generated method stub
-		Toast.makeText(getApplicationContext(), "map long click -checking", Toast.LENGTH_SHORT).show();
 		checkFence(point);
 	}
 
 	@Override
 	public void onMapClick(LatLng point) {
 		// TODO Auto-generated method stub
-		Toast.makeText(getApplicationContext(), "map click", Toast.LENGTH_SHORT).show();
-			// Get Intersecting Fences
-		
-		
 	}
 
 
@@ -541,6 +536,11 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	}
 	
 	private class findOverlap extends AsyncTask<URL, Integer, String> {
+		ProgressDialog progress = new ProgressDialog(DeleteActivity.this);
+		protected void onPreExecute(){
+			this.progress = ProgressDialog.show(DeleteActivity.this, 
+		               null, Html.fromHtml("<big>Highlighting Selection...</big>"), true);
+		}
 	     protected String doInBackground(URL... urls) {
 				try {
 						  HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
@@ -567,15 +567,14 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 
 			}
 	     protected void onPostExecute(String res) {
-	    	 
+	    	 progress.dismiss();
 	    	 if(res.equals("true"))
 	    		 {
-	    		 Toast.makeText(getApplicationContext(), "overlap found", Toast.LENGTH_SHORT).show();
 	    		 highlightFences();
 	    		 sMenu.getItem(0).setEnabled(true);
 	    		 }
 	    	 else
-	    		 Toast.makeText(getApplicationContext(), "overlap not found", Toast.LENGTH_SHORT).show();
+	    		 Toast.makeText(getApplicationContext(), "No Fences Selected!", Toast.LENGTH_SHORT).show();
 	     }
 	}
 	     
@@ -660,6 +659,11 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	
 	
 	private class del_this extends AsyncTask<URL, Integer, String> {
+		ProgressDialog progress = new ProgressDialog(DeleteActivity.this);
+		protected void onPreExecute(){
+			this.progress = ProgressDialog.show(DeleteActivity.this, 
+		               null, Html.fromHtml("<big>Deleting Fence(s)...</big>"), true);
+		}
 	     protected String doInBackground(URL... urls) {
 				try {
 					
@@ -691,10 +695,10 @@ protected void onPostExecute(String res) {
 	         getFenceDisplay();
 	         overlapList.clear();
 	         fence_ids.setLength(0);
+	         progress.dismiss();
 	    	 if(res.equals("true"))
 	    		 {
-	    		 Toast.makeText(getApplicationContext(), "Fences deleted", Toast.LENGTH_SHORT).show();
-	    		 
+	    		 //Toast.makeText(getApplicationContext(), "Fences deleted", Toast.LENGTH_SHORT).show();  		 
 	    		 }
 	    	 else
 	    		 Toast.makeText(getApplicationContext(), "Unable to delete selected fences!", Toast.LENGTH_SHORT).show();

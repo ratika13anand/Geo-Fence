@@ -36,6 +36,8 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
@@ -80,6 +82,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	PolylineOptions polylineOptions;
 	private static boolean checkpoint = false;
 	private static boolean clickpoint = false;
+	private static boolean rangeQuery = false;
 	
     private static ArrayList<FenceObj> fenceList = new ArrayList<FenceObj>();
     public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/";
@@ -106,6 +109,9 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	SharedPreferences mPrefs;
 	Editor mEditor;
 	private static Menu sMenu ;
+	private static int sRange=0;
+	private static Location curloc;
+	
 	
 	
 	@Override
@@ -324,6 +330,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	 						Toast.LENGTH_LONG).show(); 
 	 					} 
 	 			if (id == R.id.range) { 
+	 				      rangeQuery = true;
 	 						item.setCheckable(true); 
 	 					sMenu.getItem(1).setChecked(false); 
 	 					sMenu.getItem(2).setChecked(false); 
@@ -343,19 +350,24 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
  			 
  					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(wrapper); 
  					alertDialogBuilder.setView(promptView); 
- 					alertDialogBuilder.setTitle("Enter Radius (Miles)"); 
+ 					alertDialogBuilder.setTitle("Enter Radius (Yards)"); 
  				final NumberPicker np = (NumberPicker) promptView 
  							.findViewById(R.id.numberPicker); 
- 					np.setMaxValue(100); 
- 				np.setMinValue(1); 
- 					np.setWrapSelectorWheel(true); 
+ 					
+ 				    final String str[] = {"0","50","100","150","200","250","300",
+ 				    		"350","400","450","500","550","600",
+ 				    		"650","700","750","800","850","900","950","1000"};
+ 				    np.setMaxValue(str.length-1); 
+				    np.setMinValue(0); 
+ 				    np.setDisplayedValues(str); 				  
+ 					np.setWrapSelectorWheel(true);
  					// setup a dialog window 
  					alertDialogBuilder 
  						.setCancelable(false) 
  						.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
  									public void onClick(DialogInterface dialog, int id) { 
  										// get user input and set it to result 
- 										executeRangeQuery(np.getValue()); 
+ 										executeRangeQuery(Integer.parseInt(str[np.getValue()])); 
  									} 
  								}) 
  						.setNegativeButton("Cancel", 
@@ -377,14 +389,16 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
  						arrayPoints.clear(); 
  						fenceList.clear();
  						Location location = mLocationClient.getLastLocation(); 
+ 						curloc = location;
+ 						sRange = range;
  						String loc = Double.toString(location.getLatitude()) + ","+ Double.toString(location.getLongitude()) + "," + range ; 
  						URL url = new URL( 
  								"http://csci587team7.cloudapp.net:8080/587Service/rest/fence/range/" 
  										+ loc); 
  						System.out.println(url); 
- 						Toast.makeText(getApplicationContext(), "Fetching Fences within "+range+" mile(s)", 
+ 						Toast.makeText(getApplicationContext(), "Fetching Fences within "+range+" yard(s)", 
  						Toast.LENGTH_LONG).show(); 
- 						new getFenceData().execute(url); 
+ 						new getRangeData().execute(url); 
  					} catch (MalformedURLException e) { 
  						// TODO Auto-generated catch block 
  						e.printStackTrace(); 
@@ -412,7 +426,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 						"http://csci587team7.cloudapp.net:8080/587Service/rest/fence/point/"
 								+ buf.toString());
 				System.out.println(url);
-				Toast.makeText(getApplicationContext(), "Fetching Fences",
+				Toast.makeText(getApplicationContext(), "Fetching Fences within 500 yards",
 				Toast.LENGTH_LONG).show();
 				new getFenceData().execute(url);
 				clickpoint = false;
@@ -443,8 +457,8 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			map.addMarker(new MarkerOptions().position(point).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).draggable(true));
 			//checkpoint = false;
 			clickpoint=true;
-			Toast.makeText(getApplicationContext(), "Drag Map Marker To Desired Location.\nClick Marker To Fetch Fences Within 1 Mile.",
-			Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Drag Map Marker To Desired Location.\nClick Marker To Fetch Fences Within 500 yards.",
+			Toast.LENGTH_SHORT).show();
 			
 		}
 	}
@@ -520,6 +534,43 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	     }
 		}
 
+	private class getRangeData extends AsyncTask<URL, Integer, String> {
+	     protected String doInBackground(URL... urls) {
+	
+		//Make a call to servlet to get fence data in XML and parse the xml to get each fence
+		
+				try {
+					
+					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
+					
+		               HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
+		                  conn.setRequestMethod("GET");
+		                  conn.setDoInput(true);
+		                  conn.connect();
+		            InputStream stream = conn.getInputStream();
+		            
+					//String xmlData = "<fences><fence><fenceid>3</fenceid><coordinates>226.0,150.0;254.0,164.0;240.0,191.0;212.0,176.0;226.0,150.0;</coordinates><expiry>2014-10-22</expiry><validity>1</validity><info>Road closed due to accident.</info><security_level>1</security_level></fence></fences>";
+					XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
+					XmlPullParser myParser = xmlFactoryObject.newPullParser();
+					myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+				    myParser.setInput(stream, null);
+				    parseXMLAndStoreIt(myParser);
+				   
+		            stream.close();
+		            
+				} catch (Exception e) {
+					Log.d("Exception", e.toString());
+				}
+				return null;
+
+			}
+	     protected void onPostExecute(String res) {
+	    	
+	    	 displayRange();
+	    	 
+	     }
+		}
+
 	
 	public void parseXMLAndStoreIt(XmlPullParser myParser) {
 
@@ -590,6 +641,30 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 			System.out.println(fenceList.get(i).toString());
 			fenceList.get(i).addPoly(map);
 		}
+	}
+	
+	public void displayRange() {
+
+		//fenceList.get(0).addPolygon(map);
+        map.clear();
+
+        if(fenceList.size()==0)
+		Toast.makeText(getApplicationContext(), "No Valid Fence found!", Toast.LENGTH_SHORT).show();
+        
+		for (int i = 0; i < fenceList.size(); i++) {
+			//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
+			System.out.println(fenceList.get(i).toString());
+			fenceList.get(i).addPoly(map);
+		}
+		
+	/*	CircleOptions circle = new CircleOptions()
+        .center(new LatLng(curloc.getLatitude(), curloc.getLongitude()))
+        .radius(sRange*0.9144)
+        .strokeColor(Color.BLUE)
+        .strokeWidth(2);
+		
+		map.addCircle(circle);*/
+		
 	}
 }
 	

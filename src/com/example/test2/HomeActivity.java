@@ -69,6 +69,7 @@ public class HomeActivity extends Activity {
 		PrefUtils.saveToPrefs(this, PREFS_LOGIN_PASSWORD_KEY, null);
 		Intent intent = new Intent(this, Login.class);
 		startActivity(intent);
+		finish();
 	}	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,13 +88,7 @@ public class HomeActivity extends Activity {
 		{
 			Intent i = new Intent(this, SettingsActivity.class);
 			startActivityForResult(i, RESULT_SETTINGS);
-        
-			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-			String vibrate = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_VIBRATE, false);
-			String sound = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_RING, false);
-			
-			Toast.makeText(getApplicationContext(), "HOME vibrate is "+vibrate, Toast.LENGTH_SHORT).show();
-			Toast.makeText(getApplicationContext(), "FOME sound is "+sound, Toast.LENGTH_SHORT).show();
+
 		}
 		return true;
 	}

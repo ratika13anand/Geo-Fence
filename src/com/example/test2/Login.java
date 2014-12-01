@@ -8,10 +8,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +55,10 @@ public class Login extends Activity {
 	}
 
 	private class getLogin extends AsyncTask<URL, Integer, String> {
+		ProgressDialog progress = new ProgressDialog(Login.this);
+		protected void onPreExecute(){
+			this.progress = ProgressDialog.show(Login.this, null, Html.fromHtml("<big>Signing In...</big>"), true);
+		}
 	     protected String doInBackground(URL... urls) {
 	
 		//Make a call to servlet to get fence data in XML and parse the xml to get each fence
@@ -85,6 +91,8 @@ public class Login extends Activity {
 
 			}
 	     protected void onPostExecute(String res) {
+	    	 progress.dismiss();
+	    	
 	    	 return;
 	     }
 		}
@@ -164,15 +172,11 @@ public void checkLogin(XmlPullParser myParser) {
 			    runOnUiThread(new Runnable() {
 			        public void run()
 			        {
-			            Toast.makeText(getApplicationContext(),"Invalid Login! Signing in as Normal User", Toast.LENGTH_LONG).show();
+			            Toast.makeText(getApplicationContext(),"Invalid Username or Pasword!", Toast.LENGTH_LONG).show();
 			        }
 			    });
 			    
-			    
-			    Intent intent = new Intent(this, DisplayActivity.class);
-			    intent.putExtra("lstatus","invalid");
-				startActivity(intent);	
-				finish();
+			 
 			}
 		else
 		{

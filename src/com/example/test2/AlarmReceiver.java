@@ -80,11 +80,6 @@ public void onReceive(Context context, Intent intent) {
 	sVibrate = sharedPref.getBoolean(SettingsActivity.KEY_PREF_VIBRATE, true);
 	sSound =sharedPref.getBoolean(SettingsActivity.KEY_PREF_RING, true);
 	
-	String vibrate = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_VIBRATE, true);
-	String sound = "hey"+sharedPref.getBoolean(SettingsActivity.KEY_PREF_RING, true);
-	
-	Toast.makeText(sContext, "vibrate is "+vibrate, Toast.LENGTH_SHORT).show();
-	Toast.makeText(sContext, "sound is "+sound, Toast.LENGTH_SHORT).show();
 	setLocation();
 	pingServerAtIntervals();
 }
@@ -209,10 +204,10 @@ private class getOverlapData extends AsyncTask<URL, Integer, String> {
 
         Intent newIntent = new Intent(sContext, OverlapActivity.class);
      
-		if(sVibrate.equals("true"))
+		if(sVibrate.equals(true))
 	        notification.defaults |= Notification.DEFAULT_VIBRATE;
 		
-		if(sSound.equals("true"))
+		if(sSound.equals(true))
         notification.defaults |= Notification.DEFAULT_SOUND;
         
 	    newIntent.putExtra("xml", res);
