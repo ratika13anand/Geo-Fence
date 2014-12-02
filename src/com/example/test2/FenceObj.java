@@ -6,9 +6,7 @@ import android.graphics.Color;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 public class FenceObj {
@@ -49,10 +47,7 @@ public class FenceObj {
 	{
 		ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
 		String delims = "[;]";
-		String[] tokens = this.coordinates.split(delims);
-		//String test = "34.028472,-118.288533;34.027143,-118.284124;34.029268,-118.283866";
-		//String[] tokens = test.split(delims);
-		
+		String[] tokens = this.coordinates.split(delims);		
 		for (int i = 0; i < tokens.length; i++)
 		{
 			String[] geo = tokens[i].split(",");
@@ -78,12 +73,7 @@ public class FenceObj {
 		}
 		
 		polygonOptions.strokeWidth(5);
-		Polygon polygon = map.addPolygon(polygonOptions);
-		/*Marker marker = map.addMarker(new MarkerOptions()
-        .position(arrayPoints.get(0))
-        .title("Fence Details:")
-        .snippet(this.info));
-		marker.showInfoWindow();*/
+		map.addPolygon(polygonOptions);
 		for(int i=0;i<arrayPoints.size();i++)
 		{
 			if(this.distance.equals("-1"))
@@ -125,8 +115,7 @@ public class FenceObj {
 		
 		
 		polygonOptions.strokeWidth(5);
-		Polygon polygon = map.addPolygon(polygonOptions);
-	
+		map.addPolygon(polygonOptions);	
 		for(int i=0;i<arrayPoints.size();i++)
 		{
 			map.addMarker(new MarkerOptions()

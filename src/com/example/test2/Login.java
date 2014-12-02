@@ -12,11 +12,8 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -64,19 +61,14 @@ public class Login extends Activity {
 		//Make a call to servlet to get fence data in XML and parse the xml to get each fence
 		
 				try {
-					
-					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
-					
-		               HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
+					 HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
 		                  conn.setReadTimeout(10000 /* milliseconds */);
 		                  conn.setConnectTimeout(15000 /* milliseconds */);
 		                  conn.setRequestMethod("GET");
 		                  conn.setDoInput(true);
 		                  conn.connect();
 		            InputStream stream = conn.getInputStream();
-		            
-					//String xmlData = "<fences><fence><fenceid>3</fenceid><coordinates>226.0,150.0;254.0,164.0;240.0,191.0;212.0,176.0;226.0,150.0;</coordinates><expiry>2014-10-22</expiry><validity>1</validity><info>Road closed due to accident.</info><security_level>1</security_level></fence></fences>";
-					XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
+		            XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
 					XmlPullParser myParser = xmlFactoryObject.newPullParser();
 					myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 				    myParser.setInput(stream, null);
@@ -117,7 +109,6 @@ public class Login extends Activity {
 		}
 		try {	
 			String text = BASE_URI+uname+","+pswd;
-			//text="http://csci587team7.cloudapp.net:8080/587Service/rest/authenticate/abc,1234";
 			URL url = new URL(text);
 			new getLogin().execute(url);
 		}
@@ -128,7 +119,7 @@ public class Login extends Activity {
 	}
 	public void skip(View view)
 	{
-		//skips user login.Hence invalid user.Just display fences
+		//skips user login. Hence normal user. Just display fences
 		Intent intent = new Intent(this, DisplayActivity.class);
 	    intent.putExtra("lstatus","invalid");
 		startActivity(intent);
@@ -137,7 +128,6 @@ public class Login extends Activity {
 
 public void checkLogin(XmlPullParser myParser) {
 	int status;
-	String mode="";
 	String text="";
 	String event_status="";
 	String test=myParser.toString();
@@ -174,15 +164,14 @@ public void checkLogin(XmlPullParser myParser) {
 			        {
 			            Toast.makeText(getApplicationContext(),"Invalid Username or Pasword!", Toast.LENGTH_LONG).show();
 			        }
-			    });
-			    
-			 
-			}
+			    });	   			 
+		}
 		else
 		{
 			//valid user.Hence give him right to modify/create fences 
 			PrefUtils.saveToPrefs(Login.this, PREFS_LOGIN_USERNAME_KEY, uname);
 			PrefUtils.saveToPrefs(Login.this, PREFS_LOGIN_PASSWORD_KEY, pswd);
+			// Save User credential in App shared preferences for future automatic logins
 			Intent intent = new Intent(this, HomeActivity.class);
 		    intent.putExtra("UID", uname);
 		    intent.putExtra("lstatus","valid");
@@ -190,7 +179,4 @@ public void checkLogin(XmlPullParser myParser) {
 			finish();
 		}
 	}
-
-
 }
-

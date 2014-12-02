@@ -1,30 +1,20 @@
 package com.example.test2;
 
-	import android.support.v7.app.ActionBarActivity;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 import android.view.Menu;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-	import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 
-	import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-	import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
@@ -38,35 +28,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-	import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+	@SuppressLint("InflateParams")
 	public class OverlapActivity extends FragmentActivity implements
 	GooglePlayServicesClient.ConnectionCallbacks,
 	GooglePlayServicesClient.OnConnectionFailedListener, LocationListener,
@@ -74,11 +52,7 @@ import android.widget.Toast;
 
 		// Google Map
 		private static GoogleMap omap = null;
-		private ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
 		PolylineOptions polylineOptions;
-		private static boolean checkClick = false;
-		private static MenuItem mCreate;
-		private static MenuItem mCancel;
 	    private static ArrayList<FenceObj> fenceList = new ArrayList<FenceObj>();
 	    public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/";
 		
@@ -132,7 +106,6 @@ import android.widget.Toast;
 			mLocationClient = new LocationClient(this, this, this);
 			// Start with updates turned off
 			mUpdatesRequested = false;
-			//arrayPoints = new ArrayList<LatLng>();
 			SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.mapO);
 			omap = fm.getMap(); // display zoom map
@@ -217,7 +190,6 @@ import android.widget.Toast;
 			super.onStart();
 			mLocationClient.connect();
 			xml = getIntent().getStringExtra("xml");
-			//Toast.makeText(getApplicationContext(), "in start overlap",Toast.LENGTH_SHORT).show();
 			getFenceDisplay(xml);
 		}
 		
@@ -226,7 +198,6 @@ import android.widget.Toast;
 			
 			xml = intent.getStringExtra("xml");
 			mLocationClient.connect();
-			//Toast.makeText(getApplicationContext(), "in on new overlap",Toast.LENGTH_SHORT).show();
 			getFenceDisplay(xml);
 			
 		}
@@ -270,10 +241,8 @@ import android.widget.Toast;
 			super.onResume();
 			mLocationClient.connect();
 			initilizeMap();
-			//Toast.makeText(getApplicationContext(), "in resume overlap", Toast.LENGTH_SHORT).show();
 			if (mPrefs.contains("KEY_UPDATES_ON")) {
 				mUpdatesRequested = mPrefs.getBoolean("KEY_UPDATES_ON", false);
-
 				// Otherwise, turn off location updates
 			} else {
 				mEditor.putBoolean("KEY_UPDATES_ON", false);
@@ -326,10 +295,8 @@ import android.widget.Toast;
 
 		@Override
 		public void onMapClick(LatLng arg0) {
-			// TODO Auto-generated method stub
-			
+			// TODO Auto-generated method stub			
 		}
-
 
 		@Override
 		public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -427,12 +394,8 @@ import android.widget.Toast;
 		}
 		
 		public void displayData() {
-
-			//fenceList.get(0).addPolygon(map);
 	        omap.clear();
-			//Toast.makeText(getApplicationContext(), "list size"+fenceList.size(), Toast.LENGTH_SHORT).show();
 			for (int i = 0; i < fenceList.size(); i++) {
-				//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
 				System.out.println(fenceList.get(i).toString());
 				fenceList.get(i).addPoly(omap);
 			}

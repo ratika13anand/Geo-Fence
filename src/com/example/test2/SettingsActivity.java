@@ -7,12 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.view.MenuItem;
-import android.widget.Toast;
 
 public class SettingsActivity extends PreferenceActivity implements
 OnSharedPreferenceChangeListener {
@@ -21,6 +16,7 @@ OnSharedPreferenceChangeListener {
 	public static final String KEY_PREF_PING = "PingFrequency";
 	public static final String KEY_PREF_VIBRATE = "Vibrate";
 	public static final String KEY_PREF_RING = "Ring";
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -30,6 +26,7 @@ OnSharedPreferenceChangeListener {
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onResume() {
 	    super.onResume();
@@ -38,6 +35,7 @@ OnSharedPreferenceChangeListener {
 	            .registerOnSharedPreferenceChangeListener(this);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onPause() {
 	    super.onPause();

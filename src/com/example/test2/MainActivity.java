@@ -1,15 +1,8 @@
 package com.example.test2;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,10 +18,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -41,11 +32,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -53,20 +40,16 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.MapFragment;
 
-@SuppressLint("NewApi")
+@SuppressLint({ "NewApi", "InflateParams" })
 public class MainActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener, LocationListener,
@@ -78,7 +61,6 @@ public class MainActivity extends FragmentActivity implements
 	PolylineOptions polylineOptions;
 	private static boolean checkClick = false;
 	private static MenuItem mSubmit;
-	private static MenuItem mCancel;
 
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	// Milliseconds per second
@@ -139,23 +121,13 @@ public class MainActivity extends FragmentActivity implements
 				// Log the error
 				e.printStackTrace();
 			}
-		} else {
-			/*
-			 * If no resolution is available, display a dialog to the user with
-			 * the error.
-			 */
-			// showErrorDialog(connectionResult.getErrorCode());
-		}
+		} 
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Create the LocationRequest object
-		String UID = getIntent().getStringExtra("UID");
-		
-
-		
 		checkClick = true;
 		//Toast.makeText(getApplicationContext(), UID, Toast.LENGTH_LONG).show();
 		mLocationRequest = LocationRequest.create();
@@ -201,19 +173,14 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onMapClick(LatLng point) {
 		if (checkClick == true) {
-			//googleMap.addMarker(new MarkerOptions().position(point).icon(
-				//	BitmapDescriptorFactory.fromResource(R.drawable.pt1)));
 			googleMap.addMarker(new MarkerOptions().position(point));
 			arrayPoints.add(point);
-			//Toast.makeText(getApplicationContext(), point.toString(), Toast.LENGTH_LONG).show();
 		}
 	}
 
 	@Override
 	public void onMapLongClick(LatLng point) {
-		// googleMap.clear();
-		// arrayPoints.clear();
-		// checkClick = false;
+		
 	}
 
 	public void countPolygonPoints() {
@@ -225,10 +192,7 @@ public class MainActivity extends FragmentActivity implements
 			polygonOptions.strokeColor(Color.BLUE);
 			polygonOptions.strokeWidth(5);
 			polygonOptions.fillColor(Color.argb(100,126,247,245));
-			Polygon polygon = googleMap.addPolygon(polygonOptions);
-			
-			//Toast.makeText(this, arrayPoints.toString(), Toast.LENGTH_SHORT).show();
-			
+			googleMap.addPolygon(polygonOptions);
 		}
 	}
 
@@ -242,8 +206,6 @@ public class MainActivity extends FragmentActivity implements
 		if (arrayPoints.get(0).equals(marker.getPosition())) {
 			System.out.println("********First Point choose************");
 			countPolygonPoints();
-			
-			//sendForUpdate(pointsData);
 		}
 		return false;
 	}
@@ -268,7 +230,6 @@ public class MainActivity extends FragmentActivity implements
 			public void run() {
 				String id = "fences_sequence.nextval";
 				try {
-					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/insert/5,34.032442,-118.291698,34.029090,-118.291677,34.028885,-118.288383,34.033153,-118.288834,2015-1-20%2020:00:00,1,This%20is%20a%20test%20fence,2");
 					expiry = expiry.replace(" ", "%20");
 					info = info.replace(" ", "%20");
 				    String text = BASE_URI+id+","+arrayPoints+","+expiry+",1,"+info+","+secLevel;
@@ -385,7 +346,6 @@ public class MainActivity extends FragmentActivity implements
 			 * Remove location updates for a listener. The current Activity is
 			 * the listener, so the argument is "this".
 			 */
-			// removeLocationUpdates(this);
 		}
 		/*
 		 * After disconnect() is called, the client is considered "dead".
@@ -400,7 +360,6 @@ public class MainActivity extends FragmentActivity implements
 		getMenuInflater().inflate(R.menu.main, menu);
 
 		mSubmit = menu.getItem(0);
-		mCancel = menu.getItem(1);
 		if (checkClick == true) {
 			mSubmit.setEnabled(false);
 		} else {
@@ -414,9 +373,6 @@ public class MainActivity extends FragmentActivity implements
 	{
 		final ContextThemeWrapper wrapper = new ContextThemeWrapper(this, android.R.style.Theme_Holo);
 		final LayoutInflater layoutInflater = (LayoutInflater) wrapper.getSystemService(LAYOUT_INFLATER_SERVICE);
-		//AlertDialog.Builder builder = new AlertDialog.Builder(wrapper);
-		//LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
-		
 		View promptView = layoutInflater.inflate(R.layout.prompt,null);
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(wrapper);
@@ -433,7 +389,6 @@ public class MainActivity extends FragmentActivity implements
 		// Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 		final EditText text = (EditText) promptView.findViewById(R.id.descV);
-		
 		
 		// setup a dialog window
 		alertDialogBuilder
@@ -455,7 +410,7 @@ public class MainActivity extends FragmentActivity implements
 								.setPositiveButton("NEXT", new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog, int id) {
 												
-												View timeView = layoutInflater.inflate(R.layout.time,null);
+								View timeView = layoutInflater.inflate(R.layout.time,null);
 								final TimePicker tpicker = (TimePicker) timeView.findViewById(R.id.timePicker);
 								
 								AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(wrapper);
@@ -482,7 +437,7 @@ public class MainActivity extends FragmentActivity implements
 								sendForUpdate(pointsData);
 											}
 								})
-								.setNegativeButton("Cancel",
+								.setNegativeButton("CANCEL",
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog,	int id) {
 												dialog.cancel();
@@ -493,7 +448,7 @@ public class MainActivity extends FragmentActivity implements
 								alertTime.show();
 											}
 								})
-								.setNegativeButton("Cancel",
+								.setNegativeButton("CANCEL",
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog,	int id) {
 												dialog.cancel();
@@ -505,7 +460,7 @@ public class MainActivity extends FragmentActivity implements
 								alertDate.show();
 							}
 						})
-				.setNegativeButton("Cancel",
+				.setNegativeButton("CANCEL",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,	int id) {
 								dialog.cancel();
@@ -525,8 +480,6 @@ public class MainActivity extends FragmentActivity implements
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.submit) {
-			//checkClick = true;
-			//item.setEnabled(false);
 			getDetails();
 		}
 		if (id == R.id.cancel) {

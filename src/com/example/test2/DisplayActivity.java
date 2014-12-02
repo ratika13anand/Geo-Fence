@@ -1,19 +1,12 @@
 package com.example.test2;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
@@ -36,12 +29,8 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.FragmentActivity;
@@ -53,20 +42,12 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,7 +63,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	PolylineOptions polylineOptions;
 	private static boolean checkpoint = false;
 	private static boolean clickpoint = false;
-	private static boolean rangeQuery = false;
 	
     private static ArrayList<FenceObj> fenceList = new ArrayList<FenceObj>();
     public static final String BASE_URI = "http://csci587team7.cloudapp.net:8080/";
@@ -109,8 +89,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	SharedPreferences mPrefs;
 	Editor mEditor;
 	private static Menu sMenu ;
-	private static int sRange=0;
-	private static Location curloc;
 	
 	
 	
@@ -118,9 +96,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_display);
-		
-		String UID = getIntent().getStringExtra("UID");
-		//Toast.makeText(getApplicationContext(), UID, Toast.LENGTH_LONG).show();
 		mLocationRequest = LocationRequest.create();
 		// Use high accuracy
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -139,7 +114,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 		mLocationClient = new LocationClient(this, this, this);
 		// Start with updates turned off
 		mUpdatesRequested = false;
-		//arrayPoints = new ArrayList<LatLng>();
 		SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mapD);
 		map = fm.getMap(); // display zoom map
@@ -330,8 +304,7 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	 						Toast.LENGTH_LONG).show(); 
 	 					} 
 	 			if (id == R.id.range) { 
-	 				      rangeQuery = true;
-	 						item.setCheckable(true); 
+	 					item.setCheckable(true); 
 	 					sMenu.getItem(1).setChecked(false); 
 	 					sMenu.getItem(2).setChecked(false); 
 	 					 
@@ -389,8 +362,6 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
  						arrayPoints.clear(); 
  						fenceList.clear();
  						Location location = mLocationClient.getLastLocation(); 
- 						curloc = location;
- 						sRange = range;
  						String loc = Double.toString(location.getLatitude()) + ","+ Double.toString(location.getLongitude()) + "," + range ; 
  						URL url = new URL( 
  								"http://csci587team7.cloudapp.net:8080/587Service/rest/fence/range/" 
@@ -536,21 +507,14 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 
 	private class getRangeData extends AsyncTask<URL, Integer, String> {
 	     protected String doInBackground(URL... urls) {
-	
-		//Make a call to servlet to get fence data in XML and parse the xml to get each fence
-		
-				try {
-					
-					//URL url = new URL("http://csci587team7.cloudapp.net:8080/587Service/rest/fence");
-					
-		               HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
+			//Make a call to servlet to get fence data in XML and parse the xml to get each fence
+					try {
+					HttpURLConnection conn = (HttpURLConnection)urls[0].openConnection();
 		                  conn.setRequestMethod("GET");
 		                  conn.setDoInput(true);
 		                  conn.connect();
 		            InputStream stream = conn.getInputStream();
-		            
-					//String xmlData = "<fences><fence><fenceid>3</fenceid><coordinates>226.0,150.0;254.0,164.0;240.0,191.0;212.0,176.0;226.0,150.0;</coordinates><expiry>2014-10-22</expiry><validity>1</validity><info>Road closed due to accident.</info><security_level>1</security_level></fence></fences>";
-					XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
+		            XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
 					XmlPullParser myParser = xmlFactoryObject.newPullParser();
 					myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 				    myParser.setInput(stream, null);
@@ -629,15 +593,11 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	}
 	
 	public void displayData() {
-
-		//fenceList.get(0).addPolygon(map);
         map.clear();
-
         if(fenceList.size()==0)
 		Toast.makeText(getApplicationContext(), "No Valid Fence found!", Toast.LENGTH_SHORT).show();
         
 		for (int i = 0; i < fenceList.size(); i++) {
-			//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
 			System.out.println(fenceList.get(i).toString());
 			fenceList.get(i).addPoly(map);
 		}
@@ -645,25 +605,14 @@ OnMapClickListener, OnMapLongClickListener, OnMarkerClickListener {
 	
 	public void displayRange() {
 
-		//fenceList.get(0).addPolygon(map);
         map.clear();
-
         if(fenceList.size()==0)
 		Toast.makeText(getApplicationContext(), "No Valid Fence found!", Toast.LENGTH_SHORT).show();
         
 		for (int i = 0; i < fenceList.size(); i++) {
-			//Toast.makeText(this,fenceList.get(i).toString(),Toast.LENGTH_LONG).show();
 			System.out.println(fenceList.get(i).toString());
 			fenceList.get(i).addPoly(map);
 		}
-		
-	/*	CircleOptions circle = new CircleOptions()
-        .center(new LatLng(curloc.getLatitude(), curloc.getLongitude()))
-        .radius(sRange*0.9144)
-        .strokeColor(Color.BLUE)
-        .strokeWidth(2);
-		
-		map.addCircle(circle);*/
 		
 	}
 }

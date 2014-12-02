@@ -18,7 +18,6 @@
             android:layout_width="300dp"
             android:layout_height="130dp"
             android:src="@drawable/sym1" />
-        
     </LinearLayout>
 
     <Button
@@ -83,14 +82,14 @@
             android:layout_width="wrap_content"
             android:layout_height="30dip"
             android:layout_marginLeft="5dp"
+            android:background="@android:color/transparent"
             android:onClick="logoutF"
             android:orientation="horizontal"
             android:text="(LOGOUT)"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#FF0000"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:background="@android:color/transparent" />
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

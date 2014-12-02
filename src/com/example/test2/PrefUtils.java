@@ -17,7 +17,6 @@ public class PrefUtils {
     
     public static void saveToPrefs(Context context, String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    	//SharedPreferences prefs= context.getSharedPreferences("settings",Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(key,value);
         editor.commit();
